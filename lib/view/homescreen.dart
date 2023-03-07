@@ -1,21 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:newspaper_app/Controller/Fetchnews.dart';
+import 'package:newspaper_app/model/NewsArt.dart';
 import 'package:newspaper_app/view/widget/NewsContainer.dart';
-class HomeScreen extends StatelessWidget {
+// import 'package:newspaper_app/view/widget/NewsContainer.dart';
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool isLoading=true;
+  late newsArt NewsArt;
+  GetNews() async{
+    NewsArt=await fetchnews.fetchNews();
+    setState(() {
+    isLoading=false;
+    });
+  }
+  @override
+  void initState(){
+    GetNews();
+    super.initState();
+
+  }
   Widget build(BuildContext context) {
     return Scaffold(
         body: PageView.builder(
-          controller: PageController(),
+          controller: PageController(initialPage: 0),
           scrollDirection: Axis.vertical,
-           itemCount: 10,
+            onPageChanged:(value){
+            setState(() {
+              isLoading=true;
+            });
+            GetNews();},
             itemBuilder: (context,index){
-          return NewsContainer(imgUrl:
-          "https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8bmV3c3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
-              newsHead: "Hum krlenge",
-              newsDes: "Humne krliya", newsUrl: "");
-        }),
+          return  isLoading?Center(child: CircularProgressIndicator(),) :NewsContainer(
+            imgUrl: NewsArt.imgUrl,
+            newsCnt: NewsArt.newsCnt,
+            newsHead:NewsArt.newsHead ,
+            newsDes: NewsArt.newsDes,
+              newsUrl: NewsArt.newsUrl,);
+
+          }),
     );
   }
 }
